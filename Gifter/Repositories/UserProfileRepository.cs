@@ -21,7 +21,7 @@ namespace Gifter.Repositories
                 using (var cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                    SELECT Id, Name, Email, ImageUrl, DateCreated 
+                    SELECT Id, Name, Email, ImageUrl, Bio, DateCreated 
                     FROM UserProfile
                     ";
 
@@ -36,7 +36,8 @@ namespace Gifter.Repositories
                             Name = DbUtils.GetString(reader, "Name"),
                             Email = DbUtils.GetString(reader, "Email"),
                             DateCreated = DbUtils.GetDateTime(reader, "DateCreated"),
-                            ImageUrl = DbUtils.GetString(reader, "ImageUrl")
+                            ImageUrl = DbUtils.GetString(reader, "ImageUrl"),
+                            Bio = DbUtils.GetString(reader, "Bio")
                         });
                     }
                     reader.Close();
@@ -53,7 +54,7 @@ namespace Gifter.Repositories
                 using (var cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                    SELECT Id, Name, Email, ImageUrl, DateCreated 
+                    SELECT Id, Name, Email, ImageUrl, Bio, DateCreated 
                     FROM UserProfile
                     WHERE Id = @id
                     ";
@@ -71,7 +72,8 @@ namespace Gifter.Repositories
                             Name = DbUtils.GetString(reader, "Name"),
                             Email = DbUtils.GetString(reader, "Email"),
                             ImageUrl = DbUtils.GetString(reader, "ImageUrl"),
-                            DateCreated = DbUtils.GetDateTime(reader, "DateCreated")
+                            DateCreated = DbUtils.GetDateTime(reader, "DateCreated"),
+                            Bio = DbUtils.GetString(reader, "Bio")
 
                         };
                     }
@@ -81,5 +83,72 @@ namespace Gifter.Repositories
                 
             }
         }
+
+        public void Add(UserProfile userProfile)
+        {
+            using (var conn = Connection)
+            {
+                conn.Open();
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                    INSERT INTO UserProfile (Name, Email, ImageUrl, Bio, DateCreated)
+                    OUTPUT INSERTED.ID
+                    VALUES (@name, @email, @imageUrl, @bio, @dateCreated)
+                     ";
+
+                    DbUtils.AddParameter(cmd, "@name", userProfile.Name);
+                    DbUtils.AddParameter(cmd, "@email", userProfile.Email);
+                    DbUtils.AddParameter(cmd, "@imageUrl", userProfile.ImageUrl);
+                    DbUtils.AddParameter(cmd, "@dateCreated", userProfile.DateCreated);
+                    DbUtils.AddParameter(cmd, "@bio", userProfile.Bio);
+
+                    userProfile.Id = (int)cmd.ExecuteScalar();
+                }
+            }
+        }
+
+        public void Update(UserProfile userProfile)
+        {
+            using (var conn = Connection)
+            {
+                conn.Open();
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        UPDATE UserProfile
+                           SET Name = @name,
+                               Email = @email,
+                               DateCreated = @dateCreated,
+                               ImageUrl = @imageUrl,
+                               Bio = @bio
+                         WHERE Id = @id";
+
+                    DbUtils.AddParameter(cmd, "@name", userProfile.Name);
+                    DbUtils.AddParameter(cmd, "@email", userProfile.Email);
+                    DbUtils.AddParameter(cmd, "@dateCreated", userProfile.DateCreated);
+                    DbUtils.AddParameter(cmd, "@imageUrl", userProfile.ImageUrl);
+                    DbUtils.AddParameter(cmd, "@bio", userProfile.Bio);
+                    DbUtils.AddParameter(cmd, "@id", userProfile.Id);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public void Delete(int id)
+        {
+            using (var conn = Connection)
+            {
+                conn.Open();
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "DELETE FROM UserProfile WHERE Id = @id";
+                    DbUtils.AddParameter(cmd, "@id", id);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
     }
 }

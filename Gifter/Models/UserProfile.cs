@@ -16,6 +16,7 @@ namespace Gifter.Models
 
         //this property can be null in database
         public string ImageUrl { get; set; }
+        public string Bio { get; set; }
 
         [Required]
         public DateTime DateCreated { get; set; }
