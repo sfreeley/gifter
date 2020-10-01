@@ -183,7 +183,8 @@ namespace Gifter.Repositories
             }
         }
 
-        //getting all the unique posts with their comments
+        //getting all the unique posts with their comments; because posts can have multiple comments, they will appear
+        //more than once in sql query so to avoid that we will have to get the unique postId only once
         public List<Post> GetAllWithComments()
         {
             using (var conn = Connection)

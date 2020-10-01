@@ -32,7 +32,7 @@ namespace Gifter.Controllers
             return Ok(post);
         }
 
-        //get first matching post with comments
+        //get unique matching post with comments
         [HttpGet("GetWithComments")]
         public IActionResult GetWithComments()
         {
@@ -41,8 +41,7 @@ namespace Gifter.Controllers
         }
 
         //get a post by post Id with comments
-        [HttpGet("GetPostWithComments")]
-        [HttpGet("{id}")]
+        [HttpGet("GetWithComments/{id}")]
         public IActionResult GetPostWithComments(int id)
         {
             var post = _postRepository.GetPostByIdWithComments(id);
