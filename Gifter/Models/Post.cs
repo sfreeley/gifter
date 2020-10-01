@@ -15,6 +15,8 @@ namespace Gifter.Models
 
         [Required]
         public string ImageUrl { get; set; }
+
+        //this property can be null
         public string Caption { get; set; }
         [Required]
         public DateTime DateCreated { get; set; }
