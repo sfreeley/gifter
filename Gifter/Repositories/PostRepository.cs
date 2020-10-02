@@ -38,6 +38,7 @@ namespace Gifter.Repositories
             return sql;
         }
 
+        //----you stopped here------
         private static string GetSqlStringWithComments(bool order, bool byId)
         { 
             var sql = @"
