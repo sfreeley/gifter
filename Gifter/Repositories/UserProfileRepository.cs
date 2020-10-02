@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.Xml;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -84,7 +85,7 @@ namespace Gifter.Repositories
             }
         }
 
-        //getting unique user with all their posts
+        //getting one user with their id and all their posts including those posts comments
         public UserProfile GetWithPosts(int id)
         {
             using (var conn = Connection)
@@ -93,24 +94,32 @@ namespace Gifter.Repositories
                 using (var cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
+                    
                     SELECT up.Name, up.Bio, up.Email, up.DateCreated AS UserProfileDateCreated,
                     up.ImageUrl AS UserProfileImageUrl,
 
                     p.Id AS PostId, p.Title, p.Caption, p.DateCreated AS PostDateCreated,
-                    p.ImageUrl AS PostImageUrl, p.UserProfileId AS PostUserProfileId
+                    p.ImageUrl AS PostImageUrl, p.UserProfileId AS PostUserProfileId,
 
-                    FROM POST p
+                    c.Id AS CommentId, c.Message, c.UserProfileId AS CommentUserProfileId
+                    
+                    FROM Post p
+                    LEFT JOIN Comment c ON c.PostId = p.Id
                     LEFT JOIN UserProfile up ON p.UserProfileId = up.Id
-                    WHERE up.Id = @Id
+                    WHERE up.Id = @id
                     ";
 
+                    //adding the id parameter in order to search by userprofileId
                     DbUtils.AddParameter(cmd, "@Id", id);
                     var reader = cmd.ExecuteReader();
 
+                    //initially userProfile will be null
                     UserProfile userProfile = null;
 
+                    //while there is data in the database...
                     while (reader.Read())
                     {
+                       //because initially userProfile will be null, create new instance of UserProfile
                         if (userProfile == null)
                         {
                             userProfile = new UserProfile()
@@ -120,22 +129,62 @@ namespace Gifter.Repositories
                                 Email = DbUtils.GetString(reader, "Email"),
                                 DateCreated = DbUtils.GetDateTime(reader, "UserProfileDateCreated"),
                                 ImageUrl = DbUtils.GetString(reader, "UserProfileImageUrl"),
+                                Bio = DbUtils.GetString(reader, "Bio"),
+                                //this will be list of posts that belong to that user
                                 Posts = new List<Post>()
                             };
- 
+
                         }
 
+                        //because of one to many relationship, one post can have many comments,
+                        //if we don't get the unique ones the postId and that post entry will show up every time there is a comment
+                        //get the id of the post
+                        var postId = DbUtils.GetInt(reader, "PostId");
+                        //this will return a post that has a post Id that is equivalent to postId, BUT ONLY
+                        //if it doesn't already exist in the list of posts
+                        var existingPost = userProfile.Posts.FirstOrDefault(p => p.Id == postId);
+
+                        //we need to check and make sure that the value for the column PostId is not null
                         if (DbUtils.IsNotDbNull(reader, "PostId"))
                         {
-                            userProfile.Posts.Add(new Post()
+                            //if there is no post with that postId, the post will be null and we set its value to a new post
+                            if (existingPost == null)
                             {
-                                Id = DbUtils.GetInt(reader, "PostId"),
-                                Title = DbUtils.GetString(reader, "Title"),
-                                Caption = DbUtils.GetString(reader, "Caption"),
-                                DateCreated = DbUtils.GetDateTime(reader, "PostDateCreated"),
-                                ImageUrl = DbUtils.GetString(reader, "PostImageUrl"),
-                                UserProfileId = DbUtils.GetInt(reader, "PostUserProfileId"),
-                            });
+                                existingPost = new Post()
+                                {
+                                    Id = postId,
+                                    Title = DbUtils.GetString(reader, "Title"),
+                                    Caption = DbUtils.GetString(reader, "Caption"),
+                                    DateCreated = DbUtils.GetDateTime(reader, "PostDateCreated"),
+                                    ImageUrl = DbUtils.GetString(reader, "PostImageUrl"),
+                                    UserProfileId = DbUtils.GetInt(reader, "PostUserProfileId"),
+                                    //this will be list of comments that belong to that post
+                                    Comments = new List<Comment>()
+
+                                };
+                                //add the post to the userprofile list of posts
+                                userProfile.Posts.Add(existingPost);
+                            
+                            }
+
+                        }
+                        //then must get all the comments for this post;
+                        //because we want to get all the comments for that specific post, we have to make sure
+                        //there are actually comments for that post
+
+                        if (DbUtils.IsNotDbNull(reader, "CommentId"))
+                        {
+                            //if the column is not null, create new comment 
+                             Comment comment = new Comment()
+                            {
+                                Id = DbUtils.GetInt(reader, "CommentId"),
+                                Message = DbUtils.GetString(reader, "Message"),
+                                PostId = postId,
+                                UserProfileId = DbUtils.GetInt(reader, "CommentUserProfileId")
+                            };
+                            //add it to the comments list that belong to that post
+                            existingPost.Comments.Add(comment);
+
                         }
                     }
                     reader.Close();
