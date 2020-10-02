@@ -50,7 +50,7 @@ namespace Gifter.Repositories
                        c.Id AS CommentId, c.Message, c.UserProfileId AS CommentUserProfileId
                        FROM Post p
                        LEFT JOIN UserProfile up ON p.UserProfileId = up.id
-                       LEFT JOIN Comment c on c.PostId = p.id
+                       LEFT JOIN Comment c on c.PostId = p.id 
                     ";
             if (order)
             {
