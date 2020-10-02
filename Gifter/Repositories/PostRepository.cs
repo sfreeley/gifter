@@ -12,6 +12,62 @@ namespace Gifter.Repositories
     {
         public PostRepository(IConfiguration configuration) : base(configuration) { }
 
+        private static string GetSqlString(bool order, bool byId)
+        {
+            var sql = @"SELECT p.Id AS PostId, p.Title, p.Caption, p.DateCreated AS PostDateCreated, 
+                            p.ImageUrl AS PostImageUrl, p.UserProfileId,
+
+                           up.Name, up.Bio, up.Email, up.DateCreated AS UserProfileDateCreated, 
+                           up.ImageUrl AS UserProfileImageUrl
+                           FROM Post p 
+                           LEFT JOIN UserProfile up ON p.UserProfileId = up.id
+                        ";
+            if (order)
+            {
+                sql += " ORDER BY p.DateCreated";
+            }
+            else if (byId)
+            {
+                sql += "  WHERE p.Id = @Id";
+            }
+            else
+            {
+                sql += "";
+            }
+
+            return sql;
+        }
+
+        private static string GetSqlStringWithComments(bool order, bool byId)
+        { 
+            var sql = @"
+                         SELECT p.Id AS PostId, p.Title, p.Caption, p.DateCreated AS PostDateCreated,
+                       p.ImageUrl AS PostImageUrl, p.UserProfileId AS PostUserProfileId,
+
+                       up.Name, up.Bio, up.Email, up.DateCreated AS UserProfileDateCreated,
+                       up.ImageUrl AS UserProfileImageUrl,
+
+                       c.Id AS CommentId, c.Message, c.UserProfileId AS CommentUserProfileId
+                       FROM Post p
+                       LEFT JOIN UserProfile up ON p.UserProfileId = up.id
+                       LEFT JOIN Comment c on c.PostId = p.id
+                    ";
+            if (order)
+            {
+                sql += " ORDER BY p.DateCreated";
+            }
+            else if (byId)
+            {
+                sql += "  WHERE p.Id = @Id";
+            }
+            else
+            {
+                sql += "";
+            }
+
+            return sql;
+        }
+
         //get a list of posts; the less trips to the database made, the better your performance will be; including the UserProfile data in this database call
         public List<Post> GetAll()
         {
@@ -20,15 +76,7 @@ namespace Gifter.Repositories
                 conn.Open();
                 using (var cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"
-                SELECT p.Id AS PostId, p.Title, p.Caption, p.DateCreated AS PostDateCreated, 
-                       p.ImageUrl AS PostImageUrl, p.UserProfileId,
-
-                       up.Name, up.Bio, up.Email, up.DateCreated AS UserProfileDateCreated, 
-                       up.ImageUrl AS UserProfileImageUrl
-                  FROM Post p 
-                       LEFT JOIN UserProfile up ON p.UserProfileId = up.id
-              ORDER BY p.DateCreated";
+                    cmd.CommandText = GetSqlString(true, false);
 
                     var reader = cmd.ExecuteReader();
 
@@ -69,17 +117,8 @@ namespace Gifter.Repositories
                 conn.Open();
                 using (var cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"
-                             SELECT p.Id AS PostId, p.Title, p.Caption, p.DateCreated AS PostDateCreated, 
-                             p.ImageUrl AS PostImageUrl, p.UserProfileId,
+                    cmd.CommandText = GetSqlString(false, true);
 
-                           up.Name, up.Bio, up.Email, up.DateCreated AS UserProfileDateCreated, 
-                           up.ImageUrl AS UserProfileImageUrl
-                           FROM Post p 
-                           LEFT JOIN UserProfile up ON p.UserProfileId = up.id
-                           WHERE p.Id = @Id";
-
-               
                     // using helper method; passing in SqlCommand cmd, name of the parameter, value of the parameter passed in
                     DbUtils.AddParameter(cmd, "@Id", id);
 
