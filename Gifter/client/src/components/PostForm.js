@@ -28,11 +28,9 @@ const PostForm = () => {
 
     const addNewPost = () => {
         setIsLoading(true);
-        addPost(newPost);
-        getAllPosts();
+        //do we need another .then?
+        addPost(newPost).then(() => getAllPosts());
         setIsLoading(false);
-        setNewPost(newPost);
-
     }
 
 
