@@ -5,7 +5,7 @@ export const PostContext = React.createContext();
 
 export const PostProvider = (props) => {
     const [posts, setPosts] = useState([]);
-    const [searchPostsArray, setSearchPostsArray] = useState([]);
+
 
 
     const getAllPosts = () => {
@@ -27,12 +27,12 @@ export const PostProvider = (props) => {
     const searchPosts = (searchInput, isSortDesc) => {
         return fetch(`/api/post/search?q=${searchInput}&sortDesc=${isSortDesc}`)
             .then((res) => res.json())
-            .then(setSearchPostsArray);
+            .then(setPosts);
     }
 
     return (
         //this provides the state value of the posts array, the functions to fetch all posts and add a new post
-        <PostContext.Provider value={{ posts, getAllPosts, addPost, searchPosts, searchPostsArray }}>
+        <PostContext.Provider value={{ posts, getAllPosts, addPost, searchPosts }}>
             {props.children}
         </PostContext.Provider>
     );

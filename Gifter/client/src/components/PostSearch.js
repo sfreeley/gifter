@@ -16,6 +16,7 @@ const PostSearch = (props) => {
         setSearchTerm(searchInput.value);
         console.log(name, value)
 
+
     }
 
     const searchAllPosts = () => {
@@ -32,9 +33,7 @@ const PostSearch = (props) => {
                 {'Search'}
             </Button>
 
-            {searchPostsArray.map(post => {
-                return post.Title
-            })}
+
 
         </>
     )

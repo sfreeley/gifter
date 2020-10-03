@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from "react";
 import { PostContext } from "../providers/PostProvider";
 import Post from "./Post";
 
+
 const PostList = () => {
     const { posts, getAllPosts } = useContext(PostContext);
 
@@ -10,6 +11,7 @@ const PostList = () => {
     }, []);
 
     return (
+
         <div className="container">
             <div className="row justify-content-center">
                 <div className="cards-column">

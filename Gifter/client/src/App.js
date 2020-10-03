@@ -9,8 +9,8 @@ function App() {
   return (
     <div className="App">
       <PostProvider>
-        <PostSearch />
         <PostForm />
+        <PostSearch />
         <PostList />
       </PostProvider>
     </div>
