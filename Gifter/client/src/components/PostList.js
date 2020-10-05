@@ -4,10 +4,10 @@ import Post from "./Post";
 
 
 const PostList = () => {
-    const { posts, getAllPosts } = useContext(PostContext);
+    const { posts, getAllPosts, getAllPostsWithComments } = useContext(PostContext);
 
     useEffect(() => {
-        getAllPosts();
+        getAllPostsWithComments();
     }, []);
 
     return (
@@ -15,9 +15,10 @@ const PostList = () => {
         <div className="container">
             <div className="row justify-content-center">
                 <div className="cards-column">
-                    {posts.map((post) => (
-                        <Post key={post.id} post={post} />
-                    ))}
+                    {posts.map((post) => {
+                        return <Post key={post.id} post={post} postWithComments={post.comments} />
+                    })}
+
                 </div>
             </div>
         </div>

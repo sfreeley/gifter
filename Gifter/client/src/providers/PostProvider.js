@@ -30,9 +30,15 @@ export const PostProvider = (props) => {
             .then(setPosts);
     }
 
+    const getAllPostsWithComments = () => {
+        return fetch("/api/post/getwithcomments")
+            .then((res) => res.json())
+            .then(setPosts);
+    }
+
     return (
         //this provides the state value of the posts array, the functions to fetch all posts and add a new post
-        <PostContext.Provider value={{ posts, getAllPosts, addPost, searchPosts }}>
+        <PostContext.Provider value={{ posts, getAllPosts, addPost, searchPosts, getAllPostsWithComments }}>
             {props.children}
         </PostContext.Provider>
     );

@@ -31,6 +31,13 @@ const PostForm = () => {
         //do we need another .then?
         addPost(newPost).then(() => getAllPosts());
         setIsLoading(false);
+        setNewPost({
+            title: "",
+            imageUrl: "",
+            caption: "",
+            dateCreated: "",
+            userProfileId: 2,
+        })
     }
 
 
