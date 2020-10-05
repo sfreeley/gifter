@@ -1,9 +1,12 @@
 import React, { useState, useContext } from "react";
 import { Form, FormGroup, Label, Input, Button } from "reactstrap";
 import { PostContext } from "../providers/PostProvider";
+import { useHistory } from "react-router-dom";
 
 
 const PostForm = () => {
+    // Use this hook to allow us to programatically redirect users
+    const history = useHistory();
     const { addPost, getAllPosts } = useContext(PostContext);
 
     const [isLoading, setIsLoading] = useState(false)
@@ -37,7 +40,10 @@ const PostForm = () => {
             caption: "",
             dateCreated: "",
             userProfileId: 2,
-        })
+        });
+        //navigate the user back to the home route
+        history.push("/");
+
     }
 
 
