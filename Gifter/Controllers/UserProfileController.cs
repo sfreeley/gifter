@@ -37,6 +37,18 @@ namespace Gifter.Controllers
             return Ok(userProfile);
         }
 
+        //getting a user profile by their firebaseUserId;
+        [HttpGet("{firebaseUserId}")]
+        public IActionResult GetByFirebaseUserId(string firebaseUserId)
+        {
+            var userProfile = _userProfileRepository.GetByFirebaseUserId(firebaseUserId);
+            if (userProfile == null)
+            {
+                return NotFound();
+            }
+            return Ok(userProfile);
+        }
+
         [HttpGet("GetWithPosts/{id}")]
         public IActionResult GetUserProfileWithComments(int id)
         {
