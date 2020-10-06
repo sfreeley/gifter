@@ -381,9 +381,12 @@ namespace Gifter.Repositories
                         p.ImageUrl AS PostImageUrl, p.UserProfileId,
 
                         up.Name, up.Bio, up.Email, up.DateCreated AS UserProfileDateCreated, 
-                        up.ImageUrl AS UserProfileImageUrl
+                        up.ImageUrl AS UserProfileImageUrl,
+
+                        c.Id AS CommentId, c.Message, c.UserProfileId AS CommentUserProfileId
                     FROM Post p 
                         LEFT JOIN UserProfile up ON p.UserProfileId = up.id
+                        LEFT JOIN Comment c ON c.PostId = p.Id
                     WHERE p.Title LIKE @Criterion OR p.Caption LIKE @Criterion";
 
                     if (sortDescending)
@@ -400,25 +403,43 @@ namespace Gifter.Repositories
                     var reader = cmd.ExecuteReader();
 
                     var posts = new List<Post>();
+                    Post post = null;
                     while (reader.Read())
                     {
-                        posts.Add(new Post()
+                        if (post == null)
                         {
-                            Id = DbUtils.GetInt(reader, "PostId"),
-                            Title = DbUtils.GetString(reader, "Title"),
-                            Caption = DbUtils.GetString(reader, "Caption"),
-                            DateCreated = DbUtils.GetDateTime(reader, "PostDateCreated"),
-                            ImageUrl = DbUtils.GetString(reader, "PostImageUrl"),
-                            UserProfileId = DbUtils.GetInt(reader, "UserProfileId"),
-                            UserProfile = new UserProfile()
+                            post = new Post()
                             {
-                                Id = DbUtils.GetInt(reader, "UserProfileId"),
-                                Name = DbUtils.GetString(reader, "Name"),
-                                Email = DbUtils.GetString(reader, "Email"),
-                                DateCreated = DbUtils.GetDateTime(reader, "UserProfileDateCreated"),
-                                ImageUrl = DbUtils.GetString(reader, "UserProfileImageUrl"),
-                            },
-                        });
+                                Id = DbUtils.GetInt(reader, "PostId"),
+                                Title = DbUtils.GetString(reader, "Title"),
+                                Caption = DbUtils.GetString(reader, "Caption"),
+                                DateCreated = DbUtils.GetDateTime(reader, "PostDateCreated"),
+                                ImageUrl = DbUtils.GetString(reader, "PostImageUrl"),
+                                UserProfileId = DbUtils.GetInt(reader, "UserProfileId"),
+                                UserProfile = new UserProfile()
+                                {
+                                    Id = DbUtils.GetInt(reader, "UserProfileId"),
+                                    Name = DbUtils.GetString(reader, "Name"),
+                                    Email = DbUtils.GetString(reader, "Email"),
+                                    DateCreated = DbUtils.GetDateTime(reader, "UserProfileDateCreated"),
+                                    ImageUrl = DbUtils.GetString(reader, "UserProfileImageUrl"),
+                                },
+                                Comments = new List<Comment>()
+                            };
+                            posts.Add(post);
+                            
+                        };
+
+                        if (DbUtils.IsNotDbNull(reader, "CommentId"))
+                        {
+                            post.Comments.Add(new Comment()
+                            {
+                                Id = DbUtils.GetInt(reader, "CommentId"),
+                                Message = DbUtils.GetString(reader, "Message"),
+                                PostId = DbUtils.GetInt(reader, "PostId"),
+                                UserProfileId = DbUtils.GetInt(reader, "CommentUserProfileId")
+                            });
+                        }
                     }
 
                     reader.Close();

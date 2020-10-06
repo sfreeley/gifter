@@ -5,9 +5,6 @@ export const PostContext = React.createContext();
 
 export const PostProvider = (props) => {
     const [posts, setPosts] = useState([]);
-    // const [post, setPost] = useState();
-
-
 
     const getAllPosts = () => {
         return fetch("/api/post")
@@ -37,15 +34,14 @@ export const PostProvider = (props) => {
             .then(setPosts);
     }
 
-    const getPostWithComments = (id) => {
-        return fetch(`api/post/getwithcomments/${id}`)
+    const getPost = (id) => {
+        return fetch(`/api/post/getwithcomments/${id}`)
             .then((res) => res.json())
-        // .then(setPost);
     }
 
     return (
-        //this provides the state value of the posts array, the functions to fetch all posts and add a new post
-        <PostContext.Provider value={{ posts, getAllPosts, addPost, searchPosts, getAllPostsWithComments, getPostWithComments }}>
+        //this provides the state value of the posts array, the functions to fetch all posts and add a new post, get all the posts with all the comments, get one post with all the comments
+        <PostContext.Provider value={{ posts, getAllPosts, addPost, searchPosts, getAllPostsWithComments, getPost }}>
             {props.children}
         </PostContext.Provider>
     );

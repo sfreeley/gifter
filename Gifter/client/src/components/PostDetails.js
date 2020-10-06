@@ -9,12 +9,12 @@ const PostDetails = () => {
     //putting that one individual post into state
     const [post, setPost] = useState();
     //using the getPost function that the context provided for us
-    const { getPostWithComments } = useContext(PostContext);
+    const { getPost } = useContext(PostContext);
     //using the route parameter
     const { id } = useParams();
 
     useEffect(() => {
-        getPostWithComments(id)
+        getPost(id)
             .then(setPost);
     }, []);
 
@@ -28,7 +28,7 @@ const PostDetails = () => {
                 <div className="col-sm-12 col-lg-6">
                     <Post post={post} />
                     <ListGroup>
-                        {post.comments.map((c) => (
+                        {post.comments && post.comments.map((c) => (
                             <ListGroupItem>{c.message}</ListGroupItem>
                         ))}
                     </ListGroup>

@@ -5,7 +5,11 @@ import { Card, CardImg, CardBody } from "reactstrap";
 const Post = ({ post }) => {
     return (
         <Card className="m-4">
-            <p className="text-left px-2">Posted by: {post.userProfile.name}</p>
+            <p className="text-left px-2">Posted by:
+            <Link to={`/users/${post.userProfileId}`}>
+                    {post.userProfile.name}
+                </Link>
+            </p>
             <CardImg top src={post.imageUrl} alt={post.title} />
             <CardBody>
                 <p>
@@ -14,10 +18,17 @@ const Post = ({ post }) => {
                     </Link>
                 </p>
                 <p>{post.caption}</p>
-                {post.comments && post.comments.length === 0 ? null : <h4>Comments</h4>}
-                {post.comments && post.comments.map(aPostWithComments => {
-                    return <p>{aPostWithComments.message}</p>
-                })}
+                {post.comments && post.comments.length === 0 ? null :
+                    <>
+                        <h5>Comments</h5>
+                        <p>
+                            {post.comments.map(comment => {
+                                return <p>{comment.message}</p>
+                            })}
+                        </p>
+
+                    </>}
+
             </CardBody>
         </Card>
     );
