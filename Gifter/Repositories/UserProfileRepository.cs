@@ -22,9 +22,8 @@ namespace Gifter.Repositories
                 using (var cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT up.Id, Up.FirebaseUserId, up.Name AS UserProfileName, up.Email, up.UserTypeId,
-                               ut.Name AS UserTypeName
-                        FROM UserProfile up
+                        SELECT Id, FirebaseUserId, Name, Email, ImageUrl, Bio, DateCreated, 
+                        FROM UserProfile 
                         WHERE FirebaseUserId = @FirebaseuserId";
 
                     DbUtils.AddParameter(cmd, "@FirebaseUserId", firebaseUserId);
