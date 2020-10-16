@@ -49,8 +49,6 @@ namespace Gifter.Tests.Mocks
                 return;
             }
 
-            //remove that post from the list of posts
-            _data.Remove(postTodelete);
         }
 
         public List<Post> GetAll()
